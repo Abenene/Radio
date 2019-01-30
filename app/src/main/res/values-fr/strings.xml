@@ -85,4 +85,6 @@
     <string name="android_auto_update_download_progress">Téléchargement: %1$d%%</string>
 
     <string name="android_auto_update_dialog_checking">Vérification de la version</string>
+
+
 </resources>

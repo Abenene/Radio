@@ -21,9 +21,7 @@ package org.oucho.radio2;
 
 import android.app.Application;
 import android.graphics.Bitmap;
-import android.util.Log;
 
-import com.squareup.leakcanary.LeakCanary;
 import com.squareup.picasso.LruCache;
 import com.squareup.picasso.Picasso;
 
@@ -38,17 +36,10 @@ public class RadioApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-       if (LeakCanary.isInAnalyzerProcess(this)) {
-
-            return;
-       }
-       LeakCanary.install(this);
 
         setInstance(this);
 
-        int pool = (Runtime.getRuntime().availableProcessors() * 2) +1 ;
-
-        Log.i("Radio", "Number of core : " + Runtime.getRuntime().availableProcessors() );
+        int pool = Runtime.getRuntime().availableProcessors() +1 ;
 
         Picasso picasso = new Picasso.Builder(this)
                 .memoryCache(new LruCache(16777216)) // en octet
