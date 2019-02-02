@@ -10,7 +10,7 @@
     android:paddingRight="2dp"
     android:background="?attr/selectableItemBackground" >
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/detail_cardview"
         android:layout_width="@dimen/radio_logo"
         android:layout_height="@dimen/radio_logo"
@@ -37,7 +37,7 @@
             android:layout_height="@dimen/radio_logo"
             android:visibility="gone"/>
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
     <ImageButton
         android:id="@+id/buttonMenu"

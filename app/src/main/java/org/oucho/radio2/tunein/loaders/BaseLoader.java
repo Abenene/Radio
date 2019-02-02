@@ -20,7 +20,7 @@
 package org.oucho.radio2.tunein.loaders;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 
 
 abstract class BaseLoader<D> extends AsyncTaskLoader<D> {

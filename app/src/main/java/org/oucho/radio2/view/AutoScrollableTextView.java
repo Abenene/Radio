@@ -21,7 +21,7 @@ package org.oucho.radio2.view;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.support.v7.widget.AppCompatTextView;
+import androidx.appcompat.widget.AppCompatTextView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 

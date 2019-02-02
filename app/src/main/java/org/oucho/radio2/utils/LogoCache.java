@@ -20,7 +20,7 @@
 package org.oucho.radio2.utils;
 
 import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
+import androidx.collection.LruCache;
 
 import org.oucho.radio2.db.Radio;
 

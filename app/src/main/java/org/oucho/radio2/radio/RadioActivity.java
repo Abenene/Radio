@@ -22,7 +22,7 @@ package org.oucho.radio2.radio;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.oucho.radio2.MainActivity;
 import org.oucho.radio2.db.Radio;
