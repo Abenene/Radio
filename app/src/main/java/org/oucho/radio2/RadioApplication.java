@@ -33,6 +33,7 @@ public class RadioApplication extends Application {
 
     private static RadioApplication sInstance;
 
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -49,6 +50,7 @@ public class RadioApplication extends Application {
 
         Picasso.setSingletonInstance(picasso);
     }
+
 
     public static synchronized RadioApplication getInstance() {
         return sInstance;

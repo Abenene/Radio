@@ -111,12 +111,13 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
     private String import_export_radio_list;
     private final String app_music = "org.oucho.musicplayer";
 
+    private static boolean running;
+
     private boolean isFocusedSearch;
+    private static boolean bHome = false;
     private boolean showBitrate = false;
     private boolean mpd_app_is_installed = false;
     private boolean music_app_is_installed = false;
-    private static boolean running;
-    private static boolean bHome = false;
 
     private final Handler handlerScroll = new Handler();
     private final Handler handlerBitrate = new Handler();
@@ -438,13 +439,12 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
             }
             return false;
         });
-
     }
+
 
     private void setSearch() {
 
         String textSearch = editText.getText().toString();
-
 
         if (!textSearch.equals("")) {
             Intent search = new Intent();
@@ -460,8 +460,8 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
         }
-
     }
+
 
     private final View.OnFocusChangeListener focusListener = new View.OnFocusChangeListener() {
         public void onFocusChange(View v, boolean hasFocus) {
@@ -476,7 +476,6 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return true;
-
         } else if (keyCode == KeyEvent.KEYCODE_BACK) {
             onBackPressed();
         }
@@ -484,20 +483,19 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
         return super.onKeyDown(keyCode, event);
     }
 
+
     @Override
     public void onBackPressed() {
 
         if (isFocusedSearch) {
-
             Intent focus = new Intent();
             focus.setAction(INTENT_FOCUS);
             sendBroadcast(focus);
-
         } else {
-
             moveTaskToBack(true);
         }
     }
+
 
     /* **********************************************************************************************
     *
@@ -557,10 +555,8 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
                 playing_state = intent.getStringExtra("state");
                 radio_name = intent.getStringExtra("name");
 
-                if (closeApplication) {
+                if (closeApplication)
                     exit();
-                }
-
 
                 // Traduction du texte
                 String locale_string;
@@ -594,8 +590,8 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
 
             }
         }
-    }
 
+    }
 
 
    /* *********************************
@@ -621,11 +617,10 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
     private void updatePlayPauseIcon() {
         ImageView img_equalizer = findViewById(R.id.icon_equalizer);
 
-        if (State.isPlaying() || State.isPaused()) {
+        if (State.isPlaying() || State.isPaused())
             img_equalizer.setBackground(getDrawable(R.drawable.ic_equalizer1));
-        } else {
+        else
             img_equalizer.setBackground(getDrawable(R.drawable.ic_equalizer0));
-        }
     }
 
 
@@ -658,9 +653,7 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
                         break;
                 }
                 break;
-
             case R.id.pause_radio:
-
                 switch (playing_state) {
                     case "Play":
                         action_player.putExtra("action", ACTION_PAUSE);
@@ -674,34 +667,28 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
                         break;
                 }
                 break;
-
             case R.id.add_radio:
                 popupAddRadio(v);
                 break;
-
             case R.id.search_button:
                 setSearch();
                 break;
-
             case R.id.home_button:
-
                 Intent home = new Intent();
                 home.setAction(INTENT_HOME);
 
-                if (!bHome) {
-
+                if (!bHome)
                     home.putExtra("go", "back");
-                } else {
-
+                else
                     home.putExtra("go", "home");
-                }
+
                 sendBroadcast(home);
 
                 break;
-
             default:
                 break;
         }
+
     }
 
 
@@ -730,6 +717,7 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
         popup.show();
     }
 
+
     private final OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
 
         @Override
@@ -755,11 +743,11 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
 
         final PopupMenu popup = new PopupMenu(MainActivity.this, v);
 
-        if (mpd_app_is_installed) {
+        if (mpd_app_is_installed)
             popup.getMenuInflater().inflate(R.menu.contextmenu_editdelete_mpd, popup.getMenu());
-        } else {
+        else
             popup.getMenuInflater().inflate(R.menu.contextmenu_editdelete, popup.getMenu());
-        }
+
         popup.setOnMenuItemClickListener(item -> {
 
             switch (item.getItemId()) {
@@ -801,29 +789,24 @@ public class MainActivity extends AppCompatActivity implements RadioKeys, Naviga
         mAdapter.setData(radioList);
 
         handlerScroll.removeCallbacksAndMessages(null);
-
         handlerScroll.postDelayed(() -> {
 
             String url = RadioService.getUrl();
 
-            if (RadioService.getUrl() == null) {
+            if (RadioService.getUrl() == null)
                 url = preferences.getString("url", null);
-            }
 
             for (int i = 0; i < radioList.size(); i++) {
-
                 if (radioList.get(i).getUrl().equals(url))
                     mRecyclerView.smoothScrollToPosition(i);
             }
 
         }, 250);
 
-
-
     }
 
 
-       /* **********************************************************************************************
+    /* **********************************************************************************************
     * Ajout ou édition d'une radio
     * *********************************************************************************************/
 

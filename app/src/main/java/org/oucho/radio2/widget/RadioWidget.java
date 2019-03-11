@@ -41,6 +41,7 @@ import static org.oucho.radio2.utils.State.isPlaying;
 
 public class RadioWidget extends AppWidgetProvider implements RadioKeys{
 
+
     private static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 
         // Construct the RemoteViews object
@@ -58,23 +59,22 @@ public class RadioWidget extends AppWidgetProvider implements RadioKeys{
         views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
 
         Intent playpause = new Intent();
-        if (isPlaying()) {
-            playpause.setAction(INTENT_CONTROL_PAUSE);
-        } else {
-            playpause.setAction(INTENT_CONTROL_RESTART);
-        }
-        PendingIntent togglePlayIntent = PendingIntent.getBroadcast(context, 0, playpause, 0);
 
+        if (isPlaying())
+            playpause.setAction(INTENT_CONTROL_PAUSE);
+        else
+            playpause.setAction(INTENT_CONTROL_RESTART);
+
+        PendingIntent togglePlayIntent = PendingIntent.getBroadcast(context, 0, playpause, 0);
 
         Intent stop = new Intent();
         stop.setAction(INTENT_CONTROL_STOP);
         PendingIntent stopIntent = PendingIntent.getBroadcast(context, 0, stop, 0);
 
-        if (isPlaying()) {
+        if (isPlaying())
             views.setImageViewResource(R.id.playpause, R.drawable.ic_pause_circle_filled_amber_a700_36dp);
-        } else {
+        else
             views.setImageViewResource(R.id.playpause, R.drawable.ic_play_circle_filled_amber_a700_36dp);
-        }
 
         views.setOnClickPendingIntent(R.id.stop, stopIntent);
         views.setOnClickPendingIntent(R.id.playpause, togglePlayIntent);
@@ -83,24 +83,20 @@ public class RadioWidget extends AppWidgetProvider implements RadioKeys{
         String state = RadioService.getState();
         Bitmap logo = RadioService.getLogo();
 
-        if (name == null) {
+        if (name == null)
             name = preferences.getString("name", "Radio");
-        }
 
-        if (state == null) {
+        if (state == null)
             state = "Stop";
-        }
 
         if (logo == null) {
             String img = preferences.getString("image_data", null);
 
-            if (img != null) {
+            if (img != null)
                 logo = ImageFactory.stringToBitmap(img);
-            }
         }
 
         views.setImageViewBitmap(R.id.logo, logo);
-
         views.setTextViewText(R.id.radio, name);
         views.setTextViewText(R.id.state, state);
 
@@ -108,14 +104,14 @@ public class RadioWidget extends AppWidgetProvider implements RadioKeys{
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-
         // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds) {
+        for (int appWidgetId : appWidgetIds)
             updateAppWidget(context, appWidgetManager, appWidgetId);
-        }
     }
+
 
     @Override
     public void onEnabled(Context context) {}
