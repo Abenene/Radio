@@ -23,8 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,7 +42,6 @@ import org.oucho.radio2.radio.RadioService;
 import org.oucho.radio2.tunein.adapters.BaseAdapter;
 import org.oucho.radio2.tunein.adapters.TuneInAdapter;
 import org.oucho.radio2.tunein.loaders.TuneInLoader;
-import org.oucho.radio2.utils.ImageFactory;
 import org.oucho.radio2.utils.State;
 import org.oucho.radio2.view.CustomLayoutManager;
 import org.oucho.radio2.view.fastscroll.FastScrollRecyclerView;
@@ -56,18 +53,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
+import static org.oucho.radio2.tunein.TuneInCommon.convertStreamToString;
 import static org.oucho.radio2.tunein.TuneInCommon.getRadioName;
 import static org.oucho.radio2.tunein.TuneInCommon.getRadioURL;
 import static org.oucho.radio2.tunein.TuneInCommon.getURLLink;
+import static org.oucho.radio2.tunein.TuneInCommon.saveRadio;
 import static org.oucho.radio2.utils.SendIntent.sendActionIntent;
-import static org.oucho.radio2.utils.SendIntent.sendAddRadio;
 import static org.oucho.radio2.utils.SendIntent.sendIntent;
 
 
@@ -102,12 +99,9 @@ public class TuneInFragment extends Fragment implements RadioKeys {
         View rootView = inflater.inflate(R.layout.fragment_tunein, container, false);
 
         mRecyclerView = rootView.findViewById(R.id.recyclerview);
-
         mRecyclerView.setLayoutManager(new CustomLayoutManager(mContext));
-
         mAdapter = new TuneInAdapter();
         mAdapter.setOnItemClickListener(mOnItemClickListener);
-
         mRecyclerView.setAdapter(mAdapter);
 
         progressBar = rootView.findViewById(R.id.progressBar_layout);
@@ -119,7 +113,6 @@ public class TuneInFragment extends Fragment implements RadioKeys {
 
         return rootView;
     }
-
 
 
     private void load(Bundle args) {
@@ -186,7 +179,7 @@ public class TuneInFragment extends Fragment implements RadioKeys {
                 }
 
                 if (item.contains("type=\"audio\"")) {
-                    new playItem(getRadioURL(parts), getRadioName(parts)).execute();
+                    new TunInPlaying.playItem(getRadioURL(parts), getRadioName(parts)).execute();
                 }
             }
         }
@@ -238,112 +231,12 @@ public class TuneInFragment extends Fragment implements RadioKeys {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            save(httpRequest, name_radio, url_image);
+            saveRadio(httpRequest, name_radio, url_image);
 
             return null;
         }
     }
 
-    private static void save(String httpRequest, String name_radio, String url_image) {
-        String url_radio;
-        Bitmap bmImg;
-
-        try {
-
-            URL getUrl = new URL(httpRequest);
-            HttpURLConnection connUrl = (HttpURLConnection) getUrl.openConnection();
-            connUrl.setRequestProperty("User-Agent", USER_AGENT);
-            connUrl.connect();
-            InputStream streamUrl = connUrl.getInputStream();
-            url_radio = convertStreamToString(streamUrl);
-            streamUrl.close();
-
-            URL getImg = new URL(url_image);
-            HttpURLConnection connImg = (HttpURLConnection) getImg.openConnection();
-            connImg.setRequestProperty("User-Agent", USER_AGENT);
-            connImg.connect();
-            InputStream streamImg = connImg.getInputStream();
-            bmImg = BitmapFactory.decodeStream(streamImg);
-            streamImg.close();
-
-            String img = ImageFactory.byteToString(ImageFactory.getBytes(ImageFactory.resize(bmImg)));
-            String[] rustine = url_radio.split("\n"); // a tendance à doubler l'url
-
-            Log.d(TAG, "saveItem name_radio: " + name_radio + ", url: " + rustine[0]);
-
-            String list[] = {INTENT_ADD_RADIO, rustine[0], name_radio, img};
-            sendAddRadio(RadioApplication.getInstance(), list);
-
-        } catch (SocketTimeoutException e) {
-
-            String list[] = {INTENT_ERROR, "error", "TimeoutException " + e};
-            sendIntent(RadioApplication.getInstance(), list);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    //                                   <Params, Progress, Result>
-    private static class playItem extends AsyncTask<Object, Void, String> {
-
-        String url;
-        final String name;
-
-        playItem(String url, String name) {
-            this.url = url;
-            this.name = name;
-        }
-
-        protected String doInBackground(Object... objects) {
-
-            return play(url, name);
-        }
-    }
-
-    private static String play(String url, String name) {
-
-        String data = null;
-
-        url = url.replace(" ", "%20");
-
-        try {
-
-            URL getUrl = new URL(url);
-            HttpURLConnection connUrl = (HttpURLConnection) getUrl.openConnection();
-            connUrl.setRequestProperty("User-Agent", USER_AGENT);
-            connUrl.connect();
-            InputStream streamUrl = connUrl.getInputStream();
-            data = convertStreamToString(streamUrl);
-            streamUrl.close();
-
-            Log.d(TAG, "playItem url: " + data);
-
-            String[] rustine = data.split("\n"); // a tendance à doubler l'url
-
-            if ( !(State.isPlaying() && rustine[0].equals(RadioService.getUrl())) ) {
-
-                String list[] = {ACTION_PLAY, rustine[0], name};
-                sendActionIntent(RadioApplication.getInstance(), list);
-            }
-
-        } catch (SocketTimeoutException e) {
-
-            String list[] = {INTENT_ERROR, "error", "TimeoutException " + e};
-            sendIntent(RadioApplication.getInstance(), list);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return data;
-
-    }
-
-    private static String convertStreamToString(InputStream is) {
-        Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
-    }
 
     @Override
     public void onResume() {
