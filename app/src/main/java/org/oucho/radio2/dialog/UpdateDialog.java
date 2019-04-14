@@ -38,8 +38,7 @@ public class UpdateDialog {
                     .setTitle(R.string.android_auto_update_dialog_title)
                     .setMessage(content)
                     .setPositiveButton(R.string.android_auto_update_dialog_btn_download, (dialog, id) -> goToDownload(context, downloadUrl))
-                    .setNegativeButton(R.string.android_auto_update_dialog_btn_cancel, (dialog, id) -> {
-                    })
+                    .setNegativeButton(R.string.android_auto_update_dialog_btn_cancel, (dialog, id) -> { })
                     .setCancelable(false)
                     .show();
         }

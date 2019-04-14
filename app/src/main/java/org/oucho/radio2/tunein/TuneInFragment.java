@@ -28,10 +28,6 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.Loader;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -41,16 +37,16 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 
-import org.oucho.radio2.RadioApplication;
-import org.oucho.radio2.radio.RadioService;
 import org.oucho.radio2.R;
+import org.oucho.radio2.RadioApplication;
 import org.oucho.radio2.radio.RadioKeys;
+import org.oucho.radio2.radio.RadioService;
 import org.oucho.radio2.tunein.adapters.BaseAdapter;
 import org.oucho.radio2.tunein.adapters.TuneInAdapter;
 import org.oucho.radio2.tunein.loaders.TuneInLoader;
+import org.oucho.radio2.utils.ImageFactory;
 import org.oucho.radio2.utils.State;
 import org.oucho.radio2.view.CustomLayoutManager;
-import org.oucho.radio2.utils.ImageFactory;
 import org.oucho.radio2.view.fastscroll.FastScrollRecyclerView;
 
 import java.io.InputStream;
@@ -61,6 +57,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+
+import static org.oucho.radio2.tunein.TuneInCommon.getRadioName;
+import static org.oucho.radio2.tunein.TuneInCommon.getRadioURL;
+import static org.oucho.radio2.tunein.TuneInCommon.getURLLink;
+import static org.oucho.radio2.utils.SendIntent.sendActionIntent;
+import static org.oucho.radio2.utils.SendIntent.sendAddRadio;
+import static org.oucho.radio2.utils.SendIntent.sendIntent;
 
 
 public class TuneInFragment extends Fragment implements RadioKeys {
@@ -171,35 +179,14 @@ public class TuneInFragment extends Fragment implements RadioKeys {
 
                 if (item.contains("type=\"link\"")) {
 
-                    String url = null;
-
-                    for (String part : parts) {
-
-                        if (part.contains("URL=\"")) {
-                            url = part.replace("URL=\"", "").replace("\"", "");
-                        }
-                    }
-
                     Bundle args = new Bundle();
-                    args.putString("url", url);
+                    args.putString("url", getURLLink(parts));
 
                     load(args);
                 }
 
                 if (item.contains("type=\"audio\"")) {
-
-                    String text = parts[1];
-                    String name = text.replace("text=\"", "");
-
-                    String url = null;
-
-                    for (String part : parts) {
-                        if (part.contains("URL=\"")) {
-                            url = part.replace("URL=\"", "");
-                        }
-                    }
-
-                    new playItem(url, name).execute();
+                    new playItem(getRadioURL(parts), getRadioName(parts)).execute();
                 }
             }
         }
@@ -284,19 +271,13 @@ public class TuneInFragment extends Fragment implements RadioKeys {
 
             Log.d(TAG, "saveItem name_radio: " + name_radio + ", url: " + rustine[0]);
 
-            Intent radio = new Intent();
-            radio.setAction(INTENT_ADD_RADIO);
-            radio.putExtra("url", rustine[0]);
-            radio.putExtra("name", name_radio);
-            radio.putExtra("image", img);
-            RadioApplication.getInstance().sendBroadcast(radio);
+            String list[] = {INTENT_ADD_RADIO, rustine[0], name_radio, img};
+            sendAddRadio(RadioApplication.getInstance(), list);
 
         } catch (SocketTimeoutException e) {
 
-            Intent error = new Intent();
-            error.setAction(INTENT_ERROR);
-            error.putExtra("error", "TimeoutException " + e);
-            RadioApplication.getInstance().sendBroadcast(error);
+            String list[] = {INTENT_ERROR, "error", "TimeoutException " + e};
+            sendIntent(RadioApplication.getInstance(), list);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -342,21 +323,14 @@ public class TuneInFragment extends Fragment implements RadioKeys {
 
             if ( !(State.isPlaying() && rustine[0].equals(RadioService.getUrl())) ) {
 
-                Intent player = new Intent(RadioApplication.getInstance(), RadioService.class);
-
-                player.putExtra("action", ACTION_PLAY);
-                player.putExtra("url", rustine[0]);
-                player.putExtra("name", name);
-                RadioApplication.getInstance().startService(player);
+                String list[] = {ACTION_PLAY, rustine[0], name};
+                sendActionIntent(RadioApplication.getInstance(), list);
             }
 
         } catch (SocketTimeoutException e) {
 
-            Intent error = new Intent();
-            error.setAction(INTENT_ERROR);
-            error.putExtra("error", "TimeoutException " + e);
-            RadioApplication.getInstance().sendBroadcast(error);
-
+            String list[] = {INTENT_ERROR, "error", "TimeoutException " + e};
+            sendIntent(RadioApplication.getInstance(), list);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -483,17 +457,14 @@ public class TuneInFragment extends Fragment implements RadioKeys {
     }
 
     private void setHomeButton(Boolean value) {
-        Intent intent = new Intent();
-        intent.setAction(INTENT_HOME);
-        intent.putExtra("setButton", value);
-        mContext.sendBroadcast(intent);
+        String list[] = {INTENT_HOME, "setButton"};
+        sendIntent(mContext, list, value);
     }
 
     private void goRadioList() {
-        Intent intent = new Intent();
-        intent.setAction(INTENT_TITRE);
-        intent.putExtra("titre", getResources().getString(R.string.app_name));
-        mContext.sendBroadcast(intent);
+        String list[] = {INTENT_TITRE, "titre", getResources().getString(R.string.app_name)};
+
+        sendIntent(mContext, list);
 
         setHomeButton(false);
 
