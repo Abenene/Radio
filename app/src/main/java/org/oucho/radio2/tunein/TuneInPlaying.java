@@ -17,13 +17,13 @@ import static org.oucho.radio2.tunein.TuneInCommon.convertStreamToString;
 import static org.oucho.radio2.utils.SendIntent.sendActionIntent;
 import static org.oucho.radio2.utils.SendIntent.sendIntent;
 
-class TunInPlaying implements RadioKeys {
+class TuneInPlaying implements RadioKeys {
 
 
     //                                   <Params, Progress, Result>
     static class playItem extends AsyncTask<Object, Void, String> {
 
-        String url;
+        final String url;
         final String name;
 
         playItem(String url, String name) {
@@ -86,7 +86,7 @@ class TunInPlaying implements RadioKeys {
             e.printStackTrace();
         }
 
-        return finalURL[0];
+        return finalURL != null ? finalURL[0] : null;
 
     }
 }

@@ -36,20 +36,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 
 import org.oucho.radio2.R;
-import org.oucho.radio2.RadioApplication;
 import org.oucho.radio2.radio.RadioKeys;
-import org.oucho.radio2.radio.RadioService;
 import org.oucho.radio2.tunein.adapters.BaseAdapter;
 import org.oucho.radio2.tunein.adapters.TuneInAdapter;
 import org.oucho.radio2.tunein.loaders.TuneInLoader;
-import org.oucho.radio2.utils.State;
 import org.oucho.radio2.view.CustomLayoutManager;
 import org.oucho.radio2.view.fastscroll.FastScrollRecyclerView;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -59,12 +52,10 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-import static org.oucho.radio2.tunein.TuneInCommon.convertStreamToString;
+import static org.oucho.radio2.tunein.SaveRadio.addRadio;
 import static org.oucho.radio2.tunein.TuneInCommon.getRadioName;
 import static org.oucho.radio2.tunein.TuneInCommon.getRadioURL;
 import static org.oucho.radio2.tunein.TuneInCommon.getURLLink;
-import static org.oucho.radio2.tunein.TuneInCommon.saveRadio;
-import static org.oucho.radio2.utils.SendIntent.sendActionIntent;
 import static org.oucho.radio2.utils.SendIntent.sendIntent;
 
 
@@ -166,7 +157,7 @@ public class TuneInFragment extends Fragment implements RadioKeys {
 
             if (v.getId() == R.id.radio_ajout) {
 
-                add(item);
+                addRadio(item);
 
             } else {
 
@@ -179,63 +170,14 @@ public class TuneInFragment extends Fragment implements RadioKeys {
                 }
 
                 if (item.contains("type=\"audio\"")) {
-                    new TunInPlaying.playItem(getRadioURL(parts), getRadioName(parts)).execute();
+                    new TuneInPlaying.playItem(getRadioURL(parts), getRadioName(parts)).execute();
                 }
             }
         }
     };
 
 
-    private void add(String item) {
 
-        String[] parts = item.split("\" ");
-
-        if  (item.contains("type=\"audio\"")) {
-
-            String text = parts[1];
-            String name = text.replace("text=\"" , "");
-            String url = null;
-            String url_image = null;
-
-            Log.d(TAG, "name: " + name);
-
-            for (String part : parts) {
-
-                if (part.contains("URL=\"")) {
-                    url = part.replace("URL=\"", "");
-                }
-
-                if (part.contains("image=\"")) {
-                    url_image = part.replace("image=\"", "");
-                }
-            }
-
-            new saveItem(url, name, url_image).execute();
-        }
-    }
-
-
-    private static class saveItem extends AsyncTask<Void, Void, Void> {
-
-        final String httpRequest;
-        final String name_radio;
-        final String url_image;
-
-        saveItem(String url, String name, String img){
-
-            this.httpRequest = url;
-            this.name_radio = name;
-            this.url_image = img;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            saveRadio(httpRequest, name_radio, url_image);
-
-            return null;
-        }
-    }
 
 
     @Override
