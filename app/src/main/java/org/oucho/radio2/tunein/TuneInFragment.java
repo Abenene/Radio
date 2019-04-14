@@ -24,9 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -177,20 +175,11 @@ public class TuneInFragment extends Fragment implements RadioKeys {
     };
 
 
-
-
-
     @Override
     public void onResume() {
         super.onResume();
 
-        receiver = new Receiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(INTENT_SEARCH);
-        filter.addAction(INTENT_FOCUS);
-        filter.addAction(INTENT_HOME);
-
-        mContext.registerReceiver(receiver, filter);
+        setReceiver();
 
         // Active la touche back
         //noinspection ConstantConditions
@@ -210,36 +199,52 @@ public class TuneInFragment extends Fragment implements RadioKeys {
                 audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
             }
 
-            if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
+            if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK)
+                return getHistoric();
 
-                if (historique.size() > 1) {
 
-                    String last = historique.get(historique.size() -2);
-
-                    Bundle args = new Bundle();
-                    args.putString("url", last);
-
-                    // supprime les 2 derniers.
-                    historique.remove(historique.size() - 1);
-                    historique.remove(historique.size() - 1);
-
-                    if (historique.size() > 1)
-                        setHomeButton(true);
-                    else
-                        setHomeButton(false);
-
-                    load(args);
-
-                    return true;
-
-                } else {
-
-                    goRadioList();
-                }
-
-            }
             return true;
         });
+    }
+
+
+    private void setReceiver() {
+        receiver = new Receiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(INTENT_SEARCH);
+        filter.addAction(INTENT_FOCUS);
+        filter.addAction(INTENT_HOME);
+
+        mContext.registerReceiver(receiver, filter);
+    }
+
+    private boolean getHistoric() {
+        if (historique.size() > 1) {
+
+            String last = historique.get(historique.size() -2);
+
+            Bundle args = new Bundle();
+            args.putString("url", last);
+
+            // supprime les 2 derniers.
+            historique.remove(historique.size() - 1);
+            historique.remove(historique.size() - 1);
+
+            if (historique.size() > 1)
+                setHomeButton(true);
+            else
+                setHomeButton(false);
+
+            load(args);
+
+            return true;
+
+        } else {
+
+            goRadioList();
+        }
+
+        return false;
     }
 
     @Override
